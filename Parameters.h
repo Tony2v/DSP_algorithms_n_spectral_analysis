@@ -12,7 +12,7 @@
 enum class SigType { LFM, PSK };
 typedef std::valarray<double> vad;
 
-// структура с параметрами сигнала
+// Г±ГІГ°ГіГЄГІГіГ°Г  Г± ГЇГ Г°Г Г¬ГҐГІГ°Г Г¬ГЁ Г±ГЁГЈГ­Г Г«Г 
 struct SigParams
 {
 	SigType Sig;    // type of the signal (LFM/PSK)
@@ -23,16 +23,16 @@ struct SigParams
 	double Trec;	// recieving time
 } ;		
 
-enum Mode { BZO, Tracking };	// Processing mode
+enum Mode { ###, ### };	// Processing mode
 
 /*Processing parameters for spectral Analysis Toolset
-distances vector - is a 2хN matrix - vector of valarray 2x1 vector object
+distances vector - is a 2ГµN matrix - vector of valarray 2x1 vector object
 distance vector must be sorted beforehand in all dimensions from low to higher*/
 struct Proc_params
 {
 	// To be extended ...
 
-	Mode Filt_mode; // Mode: Barrier or Tracking
+	Mode Filt_mode; // Mode: @@@ or @@@
 	std::vector <vad> distances; // low [1] and max [2] bound distances of interval 1-N; 
 	double Ti;		// transmitted pulse width
 	double Blank;
