@@ -46,11 +46,11 @@ class SA
 
 private:
 	Proc_params SA_settings;									// Structure with a parameters' set for SA
-	vector<af::array> Freq_grid;								// вектор, содержащий сетку частот в каждой из полос спектроанализатора
-	vector<std::tuple<double, double, double>> F_min_max_step;	// мин/макс частота в каждой из полос и шаг по частоте
+	vector<af::array> Freq_grid;								// ГўГҐГЄГІГ®Г°, Г±Г®Г¤ГҐГ°Г¦Г Г№ГЁГ© Г±ГҐГІГЄГі Г·Г Г±ГІГ®ГІ Гў ГЄГ Г¦Г¤Г®Г© ГЁГ§ ГЇГ®Г«Г®Г± Г±ГЇГҐГЄГІГ°Г®Г Г­Г Г«ГЁГ§Г ГІГ®Г°Г 
+	vector<std::tuple<double, double, double>> F_min_max_step;	// Г¬ГЁГ­/Г¬Г ГЄГ± Г·Г Г±ГІГ®ГІГ  Гў ГЄГ Г¦Г¤Г®Г© ГЁГ§ ГЇГ®Г«Г®Г± ГЁ ГёГ ГЈ ГЇГ® Г·Г Г±ГІГ®ГІГҐ
 
 public:
-	vector<af::array> output_SA; // выход СА
+	vector<af::array> output_SA; // ГўГ»ГµГ®Г¤ Г‘ГЂ
 
 	const vector<af::array>& get_freq_grid() const { return Freq_grid; };
 	const vector<std::tuple<double, double, double>>& get_F_min_max_step() const { return F_min_max_step; };
@@ -87,7 +87,7 @@ const vector <af::array>&  SA::process(const af::array& in)
 
 	if (SA_settings.Filt_mode == Mode::BZO)
 	{
-		double mu = SA_settings.Fband / SA_settings.Ti; // скорость модуляции для ЛЧМ сигнала
+		double mu = SA_settings.Fband / SA_settings.Ti; // Г±ГЄГ®Г°Г®Г±ГІГј Г¬Г®Г¤ГіГ«ГїГ¶ГЁГЁ Г¤Г«Гї Г‹Г—ГЊ Г±ГЁГЈГ­Г Г«Г 
 
 		vector<vad>::iterator it_b = SA_settings.distances.begin();
 		vector<vad>::iterator it_e = SA_settings.distances.end();
@@ -115,10 +115,7 @@ const vector <af::array>&  SA::process(const af::array& in)
 			N_strobe = end - begin + 1;
 
 			af::array n = af::array(af::seq(N_strobe)).as(f64);
-			af::array Hamming_Real = (0.54 - 0.46*af::cos(2.0 * Pi * n / (N_strobe - 1)));
-			af::array Hamming_Imag = (0.54 - 0.46*af::cos(2.0 * Pi * n / (N_strobe - 1)));
-
-			af::array Hamming_win = af::complex(Hamming_Real, Hamming_Imag).as(c64);
+			af::array Hamming_win = (0.54 - 0.46*af::cos(2.0 * Pi * n / (N_strobe - 1))).as(f64);
 
 			//dim_t dH = Hamming_win.elements();
 			//dim_t dI = input_strobe.elements();
@@ -127,17 +124,17 @@ const vector <af::array>&  SA::process(const af::array& in)
 
 			af::array input_spectre = af::fftNorm(input_strobe, SA_settings.Norm_factor, nfft_size[i]);	// returns input_strobe's spectre values in number nfft_size[i] after FFT with normalisation factor;
 			
-			double Fmin_high = (SA_settings.Ti - (latency[i][0] - SA_settings.Blank))*mu; // частота минимльной обрабатываемой дальности для данного строба приема (выше чем частота макс дальности)
-			double Fmax_low = (SA_settings.Ti - (latency[i][1] - SA_settings.Blank))*mu;  // частота макс обрабатываемой дальности для данного строба приема (ниже чем частота мин дальности)
+			double Fmin_high = (SA_settings.Ti - (latency[i][0] - SA_settings.Blank))*mu; // Г·Г Г±ГІГ®ГІГ  Г¬ГЁГ­ГЁГ¬Г«ГјГ­Г®Г© Г®ГЎГ°Г ГЎГ ГІГ»ГўГ ГҐГ¬Г®Г© Г¤Г Г«ГјГ­Г®Г±ГІГЁ Г¤Г«Гї Г¤Г Г­Г­Г®ГЈГ® Г±ГІГ°Г®ГЎГ  ГЇГ°ГЁГҐГ¬Г  (ГўГ»ГёГҐ Г·ГҐГ¬ Г·Г Г±ГІГ®ГІГ  Г¬Г ГЄГ± Г¤Г Г«ГјГ­Г®Г±ГІГЁ)
+			double Fmax_low = (SA_settings.Ti - (latency[i][1] - SA_settings.Blank))*mu;  // Г·Г Г±ГІГ®ГІГ  Г¬Г ГЄГ± Г®ГЎГ°Г ГЎГ ГІГ»ГўГ ГҐГ¬Г®Г© Г¤Г Г«ГјГ­Г®Г±ГІГЁ Г¤Г«Гї Г¤Г Г­Г­Г®ГЈГ® Г±ГІГ°Г®ГЎГ  ГЇГ°ГЁГҐГ¬Г  (Г­ГЁГ¦ГҐ Г·ГҐГ¬ Г·Г Г±ГІГ®ГІГ  Г¬ГЁГ­ Г¤Г Г«ГјГ­Г®Г±ГІГЁ)
 			
-			double k = nfft_size[i] / N_strobe; // коэффициент, учитывающий во сколько раз дополненная нулями посл-ть отсчетов больше чем кол-во поступающих отчетов в стробе приема
+			double k = nfft_size[i] / N_strobe; // ГЄГ®ГЅГґГґГЁГ¶ГЁГҐГ­ГІ, ГіГ·ГЁГІГ»ГўГ ГѕГ№ГЁГ© ГўГ® Г±ГЄГ®Г«ГјГЄГ® Г°Г Г§ Г¤Г®ГЇГ®Г«Г­ГҐГ­Г­Г Гї Г­ГіГ«ГїГ¬ГЁ ГЇГ®Г±Г«-ГІГј Г®ГІГ±Г·ГҐГІГ®Гў ГЎГ®Г«ГјГёГҐ Г·ГҐГ¬ ГЄГ®Г«-ГўГ® ГЇГ®Г±ГІГіГЇГ ГѕГ№ГЁГµ Г®ГІГ·ГҐГІГ®Гў Гў Г±ГІГ°Г®ГЎГҐ ГЇГ°ГЁГҐГ¬Г 
 
-			double Fstep = 1 / (t_input[i].second - t_input[i].first) / k; // шаг по сетке частот СА
+			double Fstep = 1 / (t_input[i].second - t_input[i].first) / k; // ГёГ ГЈ ГЇГ® Г±ГҐГІГЄГҐ Г·Г Г±ГІГ®ГІ Г‘ГЂ
 
 			F_min_max_step.push_back(std::make_tuple(Fmin_high, Fmax_low, Fstep));
 
-			double min_R_sample = Fmin_high * (t_input[i].second - t_input[i].first) * k;  // номер отсчета части спектра С которого требуется производить запись, двигаясь в сторону нуля
-			double max_R_sample = Fmax_low * (t_input[i].second - t_input[i].first) * k;   // номер последнего отсчета части спектра ДО которого требуется производить запись, двигаясь в сторону нуля
+			double min_R_sample = Fmin_high * (t_input[i].second - t_input[i].first) * k;  // Г­Г®Г¬ГҐГ° Г®ГІГ±Г·ГҐГІГ  Г·Г Г±ГІГЁ Г±ГЇГҐГЄГІГ°Г  Г‘ ГЄГ®ГІГ®Г°Г®ГЈГ® ГІГ°ГҐГЎГіГҐГІГ±Гї ГЇГ°Г®ГЁГ§ГўГ®Г¤ГЁГІГј Г§Г ГЇГЁГ±Гј, Г¤ГўГЁГЈГ ГїГ±Гј Гў Г±ГІГ®Г°Г®Г­Гі Г­ГіГ«Гї
+			double max_R_sample = Fmax_low * (t_input[i].second - t_input[i].first) * k;   // Г­Г®Г¬ГҐГ° ГЇГ®Г±Г«ГҐГ¤Г­ГҐГЈГ® Г®ГІГ±Г·ГҐГІГ  Г·Г Г±ГІГЁ Г±ГЇГҐГЄГІГ°Г  Г„ГЋ ГЄГ®ГІГ®Г°Г®ГЈГ® ГІГ°ГҐГЎГіГҐГІГ±Гї ГЇГ°Г®ГЁГ§ГўГ®Г¤ГЁГІГј Г§Г ГЇГЁГ±Гј, Г¤ГўГЁГЈГ ГїГ±Гј Гў Г±ГІГ®Г°Г®Г­Гі Г­ГіГ«Гї
 			
 			af::seq ind_to_write = af::seq(min_R_sample, max_R_sample, -1);
 
